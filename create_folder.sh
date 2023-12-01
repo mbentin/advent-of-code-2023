@@ -1,8 +1,14 @@
 for day_raw in {02..25}; do
     day=$(printf "%02d" "$day_raw")
-    mkdir -p "src/Day$day"
-    touch "src/Day$day/Day$day.txt" "src/Day$day/Day$day.kt" "src/Day$day/Day$(day)_test.txt"
-    cat > "src/Day$day/Day$day.kt" << EOF
+    mkdir -p "src/day$day"
+    touch "src/day$day/Day$day.txt" "src/day$day/Day$day.kt" "src/day$day/Day$(day)_test.txt"
+    echo "1" > "src/day$day/Day$(day)_test.txt"
+    cat > "src/day$day/Day$day.kt" << EOF
+package day$day
+
+import println
+import readInput
+
 fun main() {
     fun part1(input: List<String>): Int {
         return input.size
