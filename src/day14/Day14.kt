@@ -13,7 +13,7 @@ fun main() {
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day14/Day_test")
+    val testInput = readInput("Day14/Day14_test")
     check(part1(testInput) == 1)
 
     val input = readInput("Day14/Day14")
