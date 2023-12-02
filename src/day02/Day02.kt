@@ -4,10 +4,10 @@ import println
 import readInput
 import kotlin.math.max
 
-enum class BallColor(val lowercase: String) {
-    RED("red"),
-    GREEN("green"),
-    BLUE("blue")
+enum class BallColor {
+    RED,
+    GREEN,
+    BLUE
 }
 data class SetOfBall(val ballCount: Int, val color: BallColor)
 
@@ -22,36 +22,10 @@ fun Sequence<SetOfBall>.isValid(red: Int, green: Int, blue: Int) : Boolean {
     }
     return result
 }
-fun Sequence<SetOfBall>.isGameValid(red: Int, green: Int, blue: Int) : Boolean {
-    // return filter { it.color == BallColor.BLUE }.reduce {acc, ball -> acc.ballCount + ball.ballCount} <= blue
-    var redCount: Int = 0
-    var greenCount: Int = 0
-    var blueCount: Int = 0
-
-    for (ball in this) {
-        when(ball.color) {
-            BallColor.RED -> redCount += ball.ballCount
-            BallColor.GREEN -> greenCount += ball.ballCount
-            BallColor.BLUE -> blueCount += ball.ballCount
-        }
-        if (redCount > red || greenCount > green || blueCount > blue) {
-         //   redCount.println()
-         //   greenCount.println()
-         //   blueCount.println()
-
-            return false
-        }
-    }
-   // redCount.println()
-   // greenCount.println()
-   // blueCount.println()
-    return true
-}
-
 fun Sequence<SetOfBall>.minimumSet() : Triple<SetOfBall, SetOfBall, SetOfBall> {
-    var redCount: Int = 0
-    var greenCount: Int = 0
-    var blueCount: Int = 0
+    var redCount = 0
+    var greenCount = 0
+    var blueCount = 0
 
     for (ball in this) {
         when(ball.color) {
@@ -60,6 +34,7 @@ fun Sequence<SetOfBall>.minimumSet() : Triple<SetOfBall, SetOfBall, SetOfBall> {
             BallColor.BLUE -> blueCount = max(blueCount, ball.ballCount)
         }
     }
+
     return Triple(
         SetOfBall(redCount, BallColor.RED),
         SetOfBall(greenCount, BallColor.GREEN),
@@ -67,8 +42,8 @@ fun Sequence<SetOfBall>.minimumSet() : Triple<SetOfBall, SetOfBall, SetOfBall> {
     )
 }
 
-public inline fun <T> Iterable<T>.multiplicationOf(selector: (T) -> Int): Int {
-    var multiplication: Int = 1.toInt()
+inline fun <T> Iterable<T>.multiplicationOf(selector: (T) -> Int): Int {
+    var multiplication = 1
     for (element in this) {
         multiplication *= selector(element)
     }
@@ -81,29 +56,28 @@ fun main() {
     val gameR = """Game (\d+): (.*)""".toRegex()
     val setsOfBallR = """(\d+) (red|green|blue)""".toRegex()
 
+    fun parse(input: String) : Pair<Int,Sequence<SetOfBall>> {
+        val (gameID, games) = gameR
+            .matchEntire(input)
+            ?.destructured
+            ?: throw IllegalArgumentException("Incorrect input line")
+
+        val setOfBall = setsOfBallR.findAll(games).map {
+            val split = it.value.split(" ")
+            val ballColor = BallColor.valueOf(split.last().uppercase())
+            SetOfBall(split.first().toInt(), color = ballColor)
+        }
+
+        return Pair(gameID.toInt(), setOfBall)
+    }
+
     fun part1(input: List<String>): Int {
         var idsSum = 0
         for (string in input) {
-            val (gameID, games) = gameR
-                .matchEntire(string)
-                ?.destructured
-                ?: throw IllegalArgumentException("Incorrect input line")
-           // gameID.println()
-           // games.println()
-            // setsOfBallR.findAll(games).forEach { it.value.println() }
+            val (gameID, setOfBall) = parse(string)
 
-            val setOfBall = setsOfBallR.findAll(games).map {
-                val splitted = it.value.split(" ")
-                val ballColor = BallColor.valueOf(splitted.last().uppercase())
-                SetOfBall(splitted.first().toInt(), color = ballColor)
-            }
-
-
-            // games.println()
-            // setOfBall.isGameValid(12, 13, 14).println()
             if (setOfBall.isValid(12, 13, 14)) {
-                gameID.toInt().println()
-                idsSum += gameID.toInt()
+                idsSum += gameID
             }
         }
         return idsSum
@@ -112,19 +86,7 @@ fun main() {
     fun part2(input: List<String>): Int {
         var powerSum = 0
         for (string in input) {
-            val (gameID, games) = gameR
-                .matchEntire(string)
-                ?.destructured
-                ?: throw IllegalArgumentException("Incorrect input line")
-            // gameID.println()
-            // games.println()
-            // setsOfBallR.findAll(games).forEach { it.value.println() }
-
-            val setOfBall = setsOfBallR.findAll(games).map {
-                val splitted = it.value.split(" ")
-                val ballColor = BallColor.valueOf(splitted.last().uppercase())
-                SetOfBall(splitted.first().toInt(), color = ballColor)
-            }
+            val (_, setOfBall) = parse(string)
             powerSum += setOfBall.minimumSet().power()
         }
         return powerSum
@@ -134,8 +96,8 @@ fun main() {
     val testInput = readInput("Day02/Day02_test")
 
     val input = readInput("Day02/Day02")
- //   part1(testInput).println()
- //   part2(testInput).println()
-  //  part1(input).println()
+    part1(testInput).println()
+    part2(testInput).println()
+    part1(input).println()
     part2(input).println()
 }
