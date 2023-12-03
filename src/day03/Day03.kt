@@ -5,6 +5,19 @@ import println
 import readInput
 
 class SchemaLine(val symbols: Sequence<MatchResult>, val numbers: Sequence<MatchResult>)
+class Gear(val position: Int, val gearSize: Int = 1) {
+    constructor(matchResult: MatchResult) : this (
+        position = matchResult.range.start
+    )
+
+    val range: IntRange = IntRange(position - gearSize, position + gearSize)
+
+    fun isDriving(range: IntRange): Boolean {
+        return this.range.first <= range.last && this.range.last >= range.first
+    }
+}
+
+class EnginePart()
 
 fun IntRange.isAdjacent(range: IntRange): Boolean {
     val extendedRange = IntRange(range.first - 1, range.last + 1)
@@ -81,15 +94,16 @@ fun main() {
             if (previousLine != null) {
                 // Calculate the previous line
                 for (star in previousLine!!.symbols) {
+                    val gear = Gear(star)
                     if (topNumbers != null) {
                         adjacentToTop = topNumbers
-                            .map { Pair(star.range.isAdjacent(it.range), it.value) }
+                            .map { Pair(gear.isDriving(it.range), it.value) }
                     }
                     val adjacentToPrevious = previousLine!!
                         .numbers
-                        .map { Pair(star.range.isAdjacent(it.range), it.value) }
+                        .map { Pair(gear.isDriving(it.range), it.value) }
                     val adjacentCurrent = numbersFound
-                        .map { Pair(star.range.isAdjacent(it.range), it.value) }
+                        .map { Pair(gear.isDriving(it.range), it.value) }
                     val adjacentValues = (adjacentToTop + adjacentToPrevious + adjacentCurrent).filter { it.first }
                     if (adjacentValues.count() == 2) {
                         sumOfGearRatios += adjacentValues.multiplicationOf { it.second.toInt() }
@@ -98,12 +112,13 @@ fun main() {
                 // Calculate the last line
                 if (index == string.lastIndex) {
                     for (star in starFound) {
+                        val gear = Gear(star)
                         val adjacentToPrevious = previousLine!!
                             .numbers
-                            .map { Pair(star.range.isAdjacent(it.range), it.value) }
+                            .map { Pair(gear.isDriving(it.range), it.value) }
 
                         val adjacentCurrent = numbersFound
-                            .map { Pair(star.range.isAdjacent(it.range), it.value) }
+                            .map { Pair(gear.isDriving(it.range), it.value) }
 
                         val adjacentsCount = (adjacentToPrevious + adjacentCurrent).filter { it.first }.count()
                         "Adjacent count: $adjacentsCount".println()
@@ -126,8 +141,9 @@ fun main() {
     val testInput = readInput("Day03/Day03_test")
 
     val input = readInput("Day03/Day03")
+    check(part2(input) == 78826761)
   //  part1(testInput).println()
   //  part2(testInput).println()
   //  part1(input).println()
-    part2(input).println()
+  //  part2(input).println()
 }
