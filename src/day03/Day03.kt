@@ -5,19 +5,29 @@ import println
 import readInput
 
 class SchemaLine(val symbols: Sequence<MatchResult>, val numbers: Sequence<MatchResult>)
-class Gear(val position: Int, val gearSize: Int = 1) {
+class MotorLine(val gears: Sequence<Gear>, val engineParts: Sequence<EnginePart>)
+class Gear(private val position: Int, gearSize: Int = 1) {
     constructor(matchResult: MatchResult) : this (
-        position = matchResult.range.start
+        position = matchResult.range.first
     )
 
-    val range: IntRange = IntRange(position - gearSize, position + gearSize)
+    private val range: IntRange = IntRange(position - gearSize, position + gearSize)
 
     fun isDriving(range: IntRange): Boolean {
         return this.range.first <= range.last && this.range.last >= range.first
     }
 }
 
-class EnginePart()
+data class EnginePart(val value: Int, val range: IntRange) {
+    constructor(matchResult: MatchResult) : this (
+        matchResult.value.toInt(),
+        matchResult.range
+    )
+}
+
+fun Sequence<EnginePart>.drivenPartsBy(gear: Gear): Sequence<EnginePart> {
+    return this.filter { gear.isDriving(it.range) }
+}
 
 fun IntRange.isAdjacent(range: IntRange): Boolean {
     val extendedRange = IntRange(range.first - 1, range.last + 1)
@@ -27,6 +37,32 @@ fun IntRange.isAdjacent(range: IntRange): Boolean {
 fun Sequence<MatchResult>.isAdjacent(range: IntRange): Boolean {
     return this.map { range.isAdjacent(it.range) }
         .fold(false) { acc, bool -> acc || bool }
+}
+
+class MotorGearer(
+    var gears: Sequence<Gear>,
+    private val topLine: Sequence<EnginePart>?,
+    private val middleLine: MotorLine,
+    private val bottomLine: Sequence<EnginePart>
+) {
+    private var adjacentToTop: Sequence<EnginePart>? = null
+    fun lineGearRatio(): Int {
+        var sumOfGearRatios = 0
+        for (gear in gears) {
+            if (topLine != null) {
+                adjacentToTop = topLine.drivenPartsBy(gear)
+            }
+            val adjacentToPrevious = middleLine
+                .engineParts
+                .drivenPartsBy(gear)
+            val adjacentCurrent = bottomLine.drivenPartsBy(gear)
+            val adjacentValues = ((adjacentToTop ?: emptySequence()) + adjacentToPrevious + adjacentCurrent)
+            if (adjacentValues.count() == 2) {
+                sumOfGearRatios += adjacentValues.multiplicationOf { it.value }
+            }
+        }
+        return sumOfGearRatios
+    }
 }
 
 fun main() {
@@ -81,57 +117,36 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        val starR = """([*])""".toRegex()
+        val gearR = """([*])""".toRegex()
         var sumOfGearRatios = 0
-        var previousLine: SchemaLine? = null
-        var topNumbers: Sequence<MatchResult>? = null
+        var previousLine: MotorLine? = null
+        var topMotorLine: Sequence<EnginePart>? = null
 
         for ((index, string) in input.withIndex()) {
-            val numbersFound = numbersR.findAll(string)
-            val starFound = starR.findAll(string)
-            var adjacentToTop: Sequence<Pair<Boolean, String>> = emptySequence()
+            val enginePartsFound = numbersR.findAll(string).map { EnginePart(it) }
+            val starFound = gearR.findAll(string).map { Gear(it) }
+            
             "NEW LINE: $index".println()
             if (previousLine != null) {
                 // Calculate the previous line
-                for (star in previousLine!!.symbols) {
-                    val gear = Gear(star)
-                    if (topNumbers != null) {
-                        adjacentToTop = topNumbers
-                            .map { Pair(gear.isDriving(it.range), it.value) }
-                    }
-                    val adjacentToPrevious = previousLine!!
-                        .numbers
-                        .map { Pair(gear.isDriving(it.range), it.value) }
-                    val adjacentCurrent = numbersFound
-                        .map { Pair(gear.isDriving(it.range), it.value) }
-                    val adjacentValues = (adjacentToTop + adjacentToPrevious + adjacentCurrent).filter { it.first }
-                    if (adjacentValues.count() == 2) {
-                        sumOfGearRatios += adjacentValues.multiplicationOf { it.second.toInt() }
-                    }
-                }
+                val gearer = MotorGearer(
+                    previousLine!!.gears,
+                    topMotorLine,
+                    previousLine!!,
+                    enginePartsFound
+                )
+                sumOfGearRatios += gearer.lineGearRatio()
+
                 // Calculate the last line
-                if (index == string.lastIndex) {
-                    for (star in starFound) {
-                        val gear = Gear(star)
-                        val adjacentToPrevious = previousLine!!
-                            .numbers
-                            .map { Pair(gear.isDriving(it.range), it.value) }
-
-                        val adjacentCurrent = numbersFound
-                            .map { Pair(gear.isDriving(it.range), it.value) }
-
-                        val adjacentsCount = (adjacentToPrevious + adjacentCurrent).filter { it.first }.count()
-                        "Adjacent count: $adjacentsCount".println()
-                        if (adjacentsCount == 2) {
-                            sumOfGearRatios += (adjacentToPrevious + adjacentCurrent).filter { it.first }.multiplicationOf { it.second.toInt() }
-                        }
-                    }
-                }
+               if (index == string.lastIndex) {
+                   gearer.gears = starFound
+                   sumOfGearRatios += gearer.lineGearRatio()
+               }
             }
             if (index >= 1) {
-                topNumbers = previousLine?.numbers
+                topMotorLine = previousLine?.engineParts
             }
-            previousLine = SchemaLine(starFound, numbersFound)
+            previousLine = MotorLine(starFound, enginePartsFound)
         }
 
         return sumOfGearRatios
@@ -142,8 +157,8 @@ fun main() {
 
     val input = readInput("Day03/Day03")
     check(part2(input) == 78826761)
-  //  part1(testInput).println()
-  //  part2(testInput).println()
-  //  part1(input).println()
-  //  part2(input).println()
+    part1(testInput).println()
+    part2(testInput).println()
+    part1(input).println()
+    part2(input).println()
 }
