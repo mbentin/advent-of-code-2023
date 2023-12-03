@@ -1,5 +1,6 @@
 package day02
 
+import multiplicationOf
 import println
 import readInput
 import kotlin.math.max
@@ -42,13 +43,6 @@ fun Sequence<SetOfBall>.minimumSet() : Triple<SetOfBall, SetOfBall, SetOfBall> {
     )
 }
 
-inline fun <T> Iterable<T>.multiplicationOf(selector: (T) -> Int): Int {
-    var multiplication = 1
-    for (element in this) {
-        multiplication *= selector(element)
-    }
-    return multiplication
-}
 fun Triple<SetOfBall, SetOfBall, SetOfBall>.power(): Int {
     return this.toList().multiplicationOf { it.ballCount }
 }
