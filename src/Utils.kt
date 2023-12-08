@@ -19,6 +19,21 @@ inline fun <T> Sequence<T>.multiplicationOf(selector: (T) -> Int): Int {
     return multiplication
 }
 
+fun gcd(a: Long, b: Long): Long {
+    var a = a
+    var b = b
+    while (b > 0) {
+        val temp = b
+        b = a % b
+        a = temp
+    }
+    return a
+}
+
+fun lcm(a: Long, b: Long): Long {
+    return a * (b / gcd(a, b))
+}
+
 /**
  * Reads lines from the given input txt file.
  */
