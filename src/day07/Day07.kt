@@ -4,7 +4,7 @@ import println
 import readInput
 
 enum class Strength {
-    A, K, Q, J, T, N, H, P, S, C, V, D, Z;
+    A, K, Q, T, N, H, P, S, C, V, D, Z, J;
 
     companion object  {
         fun map(string: Char): Strength {
@@ -61,9 +61,17 @@ class Hand(val cards: String, val bid: Int) {
             .toList()
             .sortedByDescending { (_, value) -> value }
             // .onEach { log("${it.first}, ${it.second}") }
+        val jokerCount = try { types.first { it.first == 'J' }.second } catch (e: NoSuchElementException) { 0 }
 
         for ((index, type) in types.withIndex()) {
-            return when(type.second) {
+            if (type.first == 'J' && types.count() == 1) {
+                return Type.FIVEOF
+            }
+            if (type.first == 'J') {
+                continue
+            }
+            val cardCount = type.second + jokerCount
+            return when(cardCount) {
                 5 -> Type.FIVEOF
                 4 -> Type.FOUROF
                 3 -> {
@@ -103,7 +111,7 @@ fun main() {
        val res = hands
            // .onEach { log("CARDS: ${it.cards}, class: ${it.classification()} BID: ${it.bid}") }
            .sortedWith (Hand.comparator())
-           // .onEach { log("CARDS: ${it.cards}, classification: ${it.classification()} BID: ${it.bid}") }
+           .onEach { log("CARDS: ${it.cards}, classification: ${it.classification()} BID: ${it.bid}") }
            .withIndex()
           // .onEach { log("Index: ${it.index}, BID: ${it.value.bid}") }
            .sumOf { (it.index + 1) * it.value.bid }
@@ -121,7 +129,7 @@ fun main() {
 //    check(part1(testInput) == 1)
 
     val input = readInput("Day07/Day07")
-    // part1(testInput).println()
+   //  part1(testInput).println()
      part1(input).println() // 246003757
     // part2(testInput).println()
 }
