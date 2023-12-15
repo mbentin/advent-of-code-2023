@@ -149,6 +149,20 @@ fun Maze.display(node: PipeNode? = null) {
         kotlin.io.println()
     }
 }
+
+fun Maze.display(path: MutableList<PipeNode>) {
+    for ((indexL, line) in this.withIndex()) {
+        for((indexC, column) in line.withIndex()) {
+            val node = try { path.first { it.position.x == indexC && it.position.y == indexL } } catch (e: NoSuchElementException) { null }
+            if (node != null && node.position.x == indexC && node.position.y == indexL) {
+                print("O")
+            } else {
+                print("${column.type.char}")
+            }
+        }
+        kotlin.io.println()
+    }
+}
 fun Maze.nextNode(node: PipeNode, direction: Direction): Pair<PipeNode, Direction?> {
     val position = node.nextNodePosition(direction)
     if (position.y < 0 || position.y > this.count() ||
@@ -263,14 +277,16 @@ fun Maze.pointsEnclosedIn(path: MutableList<PipeNode>): Int {
         for((indexC, column) in line.withIndex()) {
             val node = this[indexL][indexC]
             if (path.contains(node)) {
-               count++
+               //count++
                 if (node.type == PipeType.SWBEND ||
-                    node.type == PipeType.SEBEND
-             //   ||    node.type == PipeType.ANIMAL
+                    node.type == PipeType.SEBEND ||
+                    node.type == PipeType.VERTICALPIPE
+                 ||    node.type == PipeType.ANIMAL
                     ) {
                     count++
                 }
             } else if((count % path.size) % 2 == 1 &&
+                count > 0 &&
                 indexL != 0 && indexC != 0 && // Borders
                 indexL != this.count() && // Borders
                 indexC != this[indexL].count() // Borders
@@ -285,7 +301,8 @@ fun Maze.pointsEnclosedIn(path: MutableList<PipeNode>): Int {
         }
         kotlin.io.println()
     }
-    mazeCopy.display()
+    mazeCopy.display(path = path)
+    //mazeCopy.display()
     return enclosedPoints
 }
 fun Path.isPointInsidePolygon(point: PipeNode): Boolean {
@@ -388,7 +405,7 @@ fun main() {
     val input = readInput("Day10/Day10")
    // part1(testInput).println()
    //  part1(input).println() // 6701
-   // part2(testInput).println()
-     check(part2(testInput) == 10)
-  //  part2(input).println() // 2795 > // 2200 >
+   //  part2(testInput).println()
+  //   check(part2(testInput) == 10)
+    part2(input).println() // 2795 > // 2200 > // 2231 > // 303
 }
