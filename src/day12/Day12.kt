@@ -36,10 +36,10 @@ class Row {
     }
 
     fun arrangementCount(): Long {
-        return memoizedArrangementCount(record, damages)
+        return arrangementCountWorker(record, damages)
     }
 
-    val memoizedArrangementCount = { record: String, damages: List<Int> -> arrangementCount(record, damages) }.memoize()
+    private val arrangementCountWorker = { record: String, damages: List<Int> -> arrangementCount(record, damages) }.memoize()
 
     private fun arrangementCount(record: String, damages: List<Int>): Long {
         if (record.isEmpty()) {
@@ -48,8 +48,8 @@ class Row {
 
         return when(record.first()) {
             '?' -> {
-                memoizedArrangementCount(record.substring(1), damages) +
-                        memoizedArrangementCount("#${record.substring(1)}", damages)
+                arrangementCountWorker(record.substring(1), damages) +
+                        arrangementCountWorker("#${record.substring(1)}", damages)
             }
             '#' -> when {
                 damages.isEmpty() -> 0
@@ -60,12 +60,12 @@ class Row {
                         when {
                             thisDamage == record.length -> if (remainingDamage.isEmpty()) 1 else 0
                             record[thisDamage] == '#' -> 0
-                            else -> memoizedArrangementCount(record.drop(thisDamage + 1), remainingDamage)
+                            else -> arrangementCountWorker(record.drop(thisDamage + 1), remainingDamage)
                         }
                     } else 0
                 }
             }
-            '.' -> memoizedArrangementCount(record.dropWhile { it == '.' }, damages)
+            '.' -> arrangementCountWorker(record.dropWhile { it == '.' }, damages)
             else -> throw IllegalStateException("Not a valid symbol")
         }
     }
