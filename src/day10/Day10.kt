@@ -1,92 +1,91 @@
 package day10
 
+import Direction
+import Translation
 import println
 import readInput
-class Translation(val x: Int, val y:Int, val direction: Direction? = null)
+
 interface PipeDirection {
     fun conductTranslation(provenance: Direction): Translation
-}
-enum class Direction {
-    NORTH, EAST, SOUTH, WEST
 }
 enum class PipeType(val char: Char) : PipeDirection {
     VERTICALPIPE('|') {
         override fun conductTranslation(provenance: Direction): Translation {
             return when(provenance) {
-                Direction.NORTH -> Translation(0,1, Direction.NORTH)
-                Direction.EAST -> Translation(0,0)
-                Direction.SOUTH -> Translation(0,-1, Direction.SOUTH)
-                Direction.WEST -> Translation(0,0)
+                Direction.NORTH -> Translation(0, 1, Direction.NORTH)
+                Direction.EAST -> Translation(0, 0)
+                Direction.SOUTH -> Translation(0, -1, Direction.SOUTH)
+                Direction.WEST -> Translation(0, 0)
             }
         }
     },
     HORIZONTALPIPE('-') {
         override fun conductTranslation(provenance: Direction): Translation {
             return when(provenance) {
-                Direction.NORTH -> Translation(0,0)
-                Direction.EAST -> Translation(-1,0, Direction.EAST)
-                Direction.SOUTH -> Translation(0,0)
-                Direction.WEST -> Translation(1,0, Direction.WEST)
+                Direction.NORTH -> Translation(0, 0)
+                Direction.EAST -> Translation(-1, 0, Direction.EAST)
+                Direction.SOUTH -> Translation(0, 0)
+                Direction.WEST -> Translation(1, 0, Direction.WEST)
             }
         }
     },
     NEBEND('L') {
         override fun conductTranslation(provenance: Direction): Translation {
             return when(provenance) {
-                Direction.NORTH -> Translation(1,0, Direction.WEST)
-                Direction.EAST -> Translation(0,-1, Direction.SOUTH)
-                Direction.SOUTH -> Translation(0,0)
-                Direction.WEST -> Translation(0,0)
+                Direction.NORTH -> Translation(1, 0, Direction.WEST)
+                Direction.EAST -> Translation(0, -1, Direction.SOUTH)
+                Direction.SOUTH -> Translation(0, 0)
+                Direction.WEST -> Translation(0, 0)
             }
         }
     },
     NWBEND('J') {
         override fun conductTranslation(provenance: Direction): Translation {
             return when(provenance) {
-                Direction.NORTH -> Translation(-1,0, Direction.EAST)
-                Direction.EAST -> Translation(0,0)
-                Direction.SOUTH -> Translation(0,0)
-                Direction.WEST -> Translation(0,-1, Direction.SOUTH)
+                Direction.NORTH -> Translation(-1, 0, Direction.EAST)
+                Direction.EAST -> Translation(0, 0)
+                Direction.SOUTH -> Translation(0, 0)
+                Direction.WEST -> Translation(0, -1, Direction.SOUTH)
             }
         }
     },
     SWBEND('7') {
         override fun conductTranslation(provenance: Direction): Translation {
             return when(provenance) {
-                Direction.NORTH -> Translation(0,0)
-                Direction.EAST -> Translation(0,0)
-                Direction.SOUTH -> Translation(-1,0, Direction.EAST)
-                Direction.WEST -> Translation(0,1, Direction.NORTH)
+                Direction.NORTH -> Translation(0, 0)
+                Direction.EAST -> Translation(0, 0)
+                Direction.SOUTH -> Translation(-1, 0, Direction.EAST)
+                Direction.WEST -> Translation(0, 1, Direction.NORTH)
             }
         }
     },
     SEBEND('F') {
         override fun conductTranslation(provenance: Direction): Translation {
             return when(provenance) {
-                Direction.NORTH -> Translation(0,0)
-                Direction.EAST -> Translation(0,1, Direction.NORTH)
-                Direction.SOUTH -> Translation(1,0, Direction.WEST)
-                Direction.WEST -> Translation(0,0)
+                Direction.NORTH -> Translation(0, 0)
+                Direction.EAST -> Translation(0, 1, Direction.NORTH)
+                Direction.SOUTH -> Translation(1, 0, Direction.WEST)
+                Direction.WEST -> Translation(0, 0)
             }
         }
     },
     GROUND('.') {
         override fun conductTranslation(provenance: Direction): Translation {
             return when(provenance) {
-                Direction.NORTH -> Translation(0,0)
-                Direction.EAST -> Translation(0,0)
-                Direction.SOUTH -> Translation(0,0)
-                Direction.WEST -> Translation(0,0)
+                Direction.NORTH -> Translation(0, 0)
+                Direction.EAST -> Translation(0, 0)
+                Direction.SOUTH -> Translation(0, 0)
+                Direction.WEST -> Translation(0, 0)
             }
         }
     },
     ANIMAL('S') {
         override fun conductTranslation(provenance: Direction): Translation {
             return when(provenance) {
-                Direction.NORTH -> Translation(0,-1, Direction.SOUTH)
-                Direction.EAST -> Translation(1,0, Direction.WEST)
-                Direction.SOUTH -> Translation(0,1, Direction.NORTH)
-                Direction.WEST -> Translation(-1,0, Direction.EAST)
+                Direction.NORTH -> Translation(0, -1, Direction.SOUTH)
+                Direction.EAST -> Translation(1, 0, Direction.WEST)
+                Direction.SOUTH -> Translation(0, 1, Direction.NORTH)
+                Direction.WEST -> Translation(-1, 0, Direction.EAST)
             }
         }
     },

@@ -4,6 +4,8 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
 
+enum class Direction { NORTH, EAST, SOUTH, WEST }
+class Translation(val x: Int, val y:Int, val direction: Direction? = null)
 inline fun <T> Iterable<T>.multiplicationOf(selector: (T) -> Int): Int {
     var multiplication = 1
     for (element in this) {
