@@ -32,9 +32,9 @@ enum class Object: RayDirection {
     MirrorRight {
         override fun nextDirection(provenance: Direction): List<Direction> {
             return when(provenance) {
-                Direction.NORTH -> listOf(Direction.EAST)
+                Direction.NORTH -> listOf(Direction.WEST)
                 Direction.EAST -> listOf(Direction.SOUTH)
-                Direction.SOUTH -> listOf(Direction.WEST)
+                Direction.SOUTH -> listOf(Direction.EAST)
                 Direction.WEST -> listOf(Direction.NORTH)
             }
         }
@@ -96,7 +96,7 @@ enum class Object: RayDirection {
     }
 }
 
-class Position(val x: Int, val y: Int) {
+data class Position(val x: Int, val y: Int) {
     operator fun plus(position: Position): Position {
         return Position(this.x + position.x, this.y + position.y)
     }
@@ -129,17 +129,18 @@ fun Grid.display() {
         "".println()
     }
 }
+data class Ray(val position: Position, val direction: Direction)
 class GridHandler(input: List<String>) {
     val grid: Grid = mutableListOf()
     val energizedGrid: Grid = mutableListOf()
-    val directionGrid: MutableList<MutableList<MutableList<Pair<Position, Direction>>>> = mutableListOf()
+    val directionGrid: MutableList<Ray> = mutableListOf()
     private val gridSize: Size
     init {
         val xSize = input.first().count()
         for (string in input) {
             grid.add(string.map { Object.getObject(it) }.toMutableList())
             energizedGrid.add(string.map { Object.getObject(it) }.toMutableList())
-            directionGrid.add(string.map { emptyList<Pair<Position, Direction>>().toMutableList() }.toMutableList())
+            // directionGrid.add(string.map { emptyList<Pair<Position, Direction>>().toMutableList() }.toMutableList())
         }
         gridSize = Size(xSize, grid.size)
     }
@@ -152,27 +153,43 @@ class GridHandler(input: List<String>) {
     }
 
     fun beamsOn() {
-        rayWorker(Position(0, 0), Direction.EAST)
+        val initialRay = Ray(Position(0, 0), Direction.EAST)
+        var rays = mutableListOf(initialRay)
+        while(!rays.isEmpty()) {
+            rays = rays.flatMap { ray(it) }.toMutableList()
+        }
     }
 
-    private val rayWorker = { obj: Position, initialDirection: Direction -> ray(obj, initialDirection) } // .memoize()
+    fun energyCount(): Int {
+        return energizedGrid.sumOf { list -> list.count { it == Object.Energized } }
+    }
 
-    fun ray(obj: Position, initialDirection: Direction): List<Position> {
-        if (directionGrid[obj.y][obj.x].contains(Pair(obj, initialDirection))) {
+   //  private val rayWorker = { obj: Position, initialDirection: Direction -> ray(obj, initialDirection) } // .memoize()
+
+    fun ray(ray: Ray): List<Ray> {
+        val obj = ray.position
+        val initialDirection = ray.direction
+
+        if (obj == Position(5, 0)) {
+            "Ray: $ray".println()
+        }
+        if ( ray in directionGrid) {
             return emptyList()
         }
-        directionGrid[obj.y][obj.x].add(Pair(obj, initialDirection))
+        directionGrid.add(ray)
         energizedGrid[obj.y][obj.x] = Object.Energized
         val directions = grid[obj.y][obj.x].nextDirection(initialDirection)
+        val rays = mutableListOf<Ray>()
         for (direction in directions) {
-            if (directions.isEmpty()) "EMPTY".println()
             val expectedPosition = obj + direction.translation()
             // "Position: ${obj.description()} | initialDirection: $initialDirection | ExpectedPosition: ${expectedPosition.description()} | $directions".println()
             if (expectedPosition.fitsIn(gridSize)) {
-                rayWorker(expectedPosition, direction)
+                // rayWorker(expectedPosition, direction)
+                rays.add(Ray(expectedPosition, direction))
             }
+
         }
-        return emptyList()
+        return rays.toList()
     }
 }
 fun main() {
@@ -182,7 +199,7 @@ fun main() {
         println()
         grid.beamsOn()
         grid.displayEnergizedGrid()
-        return input.size
+        return grid.energyCount()
     }
 
     fun part2(input: List<String>): Int {
@@ -194,8 +211,8 @@ fun main() {
   //  check(part1(testInput) == 1)
 
     val input = readInput("Day16/Day16")
-    part1(testInput).println()
-  //   part1(testInput).println()
+  //  part1(testInput).println()
+     part1(input).println()
   //   part2(input).println()
   //   part2(input).println()
 }
