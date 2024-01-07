@@ -5,6 +5,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.readLines
 
 
+
 fun <T> List<T>.copyOf(): List<T> {
     return mutableListOf<T>().also { it.addAll(this) }
 }
@@ -12,8 +13,8 @@ fun <T> List<T>.copyOf(): List<T> {
 fun <T> List<T>.mutableCopyOf(): MutableList<T> {
     return mutableListOf<T>().also { it.addAll(this) }
 }
-enum class Direction { NORTH, EAST, SOUTH, WEST }
-class Translation(val x: Int, val y:Int, val direction: Direction? = null)
+
+class Size(val x: Int, val y: Int)
 inline fun <T> Iterable<T>.multiplicationOf(selector: (T) -> Int): Int {
     var multiplication = 1
     for (element in this) {

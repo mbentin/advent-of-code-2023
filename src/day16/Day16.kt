@@ -1,6 +1,8 @@
 package day16
 
 import Direction
+import Position
+import Size
 import mutableCopyOf
 import println
 import readInput
@@ -97,19 +99,6 @@ enum class Object: RayDirection {
     }
 }
 
-data class Position(val x: Int, val y: Int) {
-    operator fun plus(position: Position): Position {
-        return Position(this.x + position.x, this.y + position.y)
-    }
-
-    fun fitsIn(size: Size): Boolean {
-        return this.x >= 0 && this.x < size.x && this.y >= 0 && this.y < size.y
-    }
-
-    fun description(): String {
-       return "($x,$y)"
-    }
-}
 fun Direction.translation(): Position {
     return when(this) {
         Direction.NORTH -> Position(0, -1)
@@ -120,7 +109,7 @@ fun Direction.translation(): Position {
 }
 
 typealias Grid = MutableList<MutableList<Object>>
-class Size(val x: Int, val y: Int)
+
 fun Grid.display() {
     this.forEach {
         it.forEach { obj -> print(obj.representation()) }
