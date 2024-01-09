@@ -1,4 +1,13 @@
-enum class Direction { NORTH, EAST, SOUTH, WEST }
+enum class Direction { NORTH, EAST, SOUTH, WEST;
+    fun sides(): List<Direction> {
+        return when(this) {
+            NORTH -> listOf(WEST, EAST)
+            EAST -> listOf(NORTH, SOUTH)
+            SOUTH -> listOf(WEST, EAST)
+            WEST -> listOf(NORTH, SOUTH)
+        }
+    }
+}
 class Translation(val x: Int, val y:Int, val direction: Direction? = null)
 data class Position(val x: Int, val y: Int) {
     operator fun plus(position: Position): Position {
@@ -10,17 +19,41 @@ data class Position(val x: Int, val y: Int) {
     fun description(): String {
         return "($x,$y)"
     }
+    fun translated(direction: Direction, step: Int = 1): Position {
+        return when(direction) {
+            Direction.NORTH -> Position(x, y - step)
+            Direction.EAST -> Position(x + step, y)
+            Direction.SOUTH -> Position(x, y + step)
+            Direction.WEST -> Position(x - step, y)
+        }
+    }
+
+    fun direction(position: Position): Direction {
+        if (this.x > position.x) {
+            return Direction.WEST
+        } else if (this.x < position.x) {
+            return Direction.EAST
+        } else if (this.y < position.y) {
+            return Direction.SOUTH
+        } else if (this.y > position.y) {
+            return Direction.NORTH
+        }
+        return Direction.SOUTH
+    }
 }
 
+interface Neighboring {
+    fun neighborsFor(position: Position): List<Position>
+}
 @JvmInline
-value class Grid<T>(val grid: MutableList<MutableList<T>>) {
+value class Grid<T>(val grid: MutableList<MutableList<T>>) : Neighboring {
    fun size(): Size {
         return Size(grid.first().size, grid.size)
     }
     fun add(list: MutableList<T>) {
         grid.add(list)
     }
-    fun neighborsFor(position: Position): List<Position> {
+    override fun neighborsFor(position: Position): List<Position> {
         val offsets = listOf(
             Position(0, 1),
             Position(0, -1),
@@ -31,6 +64,6 @@ value class Grid<T>(val grid: MutableList<MutableList<T>>) {
     }
 
     fun get(position: Position): T {
-        return grid[position.x][position.y]
+        return grid[position.y][position.x]
     }
 }
