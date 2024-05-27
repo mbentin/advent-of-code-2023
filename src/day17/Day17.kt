@@ -131,20 +131,6 @@ class ElvesMap(input: List<String>) {
             grid.add(string.map { it.digitToInt() }.toMutableList())
         }
     }
-
-    fun lastThreePosition(position: Position, cameFrom: MutableMap<Position, Position>): List<Position> {
-        if (cameFrom.count() < 3) return emptyList()
-        var position = position
-        val lastThree: MutableList<Position> = mutableListOf()
-        for (i in 0.. 2) {
-            val prec = cameFrom[position]
-            if (prec != null) {
-                lastThree.add(prec)
-                position = prec
-            }
-        }
-        return lastThree.toList()
-    }
     fun heuristic(pos1: Position, pos2: Position): Int {
         return abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y)
     }
@@ -164,14 +150,18 @@ class ElvesMap(input: List<String>) {
         while (frontier.isNotEmpty()) {
             val current = frontier.poll().first
 
-            if (current.position == destination) {
-                break
-            }
-           // val lastThree = lastThreePosition(current, cameFrom)
+          //  if (current.position == destination) {
+          //      break
+          //  }
             val neighbors = grid.neighborsFor(current)
             "New frontier".println()
             for (next in neighbors) {
+                if (next.position == Position(11, 12)) {
+                    "next".println()
+                }
                 next.println()
+                val costSoFarInt = costSoFar[current.position]
+                "CostSoFar = $costSoFarInt".println()
                 val newCost = costSoFar[current.position]?.plus(grid.get(next.position))
                 next.position.description().println()
                 "Cost so far: ${costSoFar[current.position]}, Grid Next: ${grid.get(next.position)}".println()
@@ -180,7 +170,7 @@ class ElvesMap(input: List<String>) {
                     if (next.position !in costSoFar  ||  newCost < (costSoFar[next.position] ?: 0)) {
                         costSoFar[next.position] = newCost
                         cameFrom[next.position] = current.position
-                        val priority = newCost + heuristic(next.position, destination)
+                        val priority = newCost //  + heuristic(next.position, destination)
                         frontier.add(Pair(next, priority))
                     }
                 }
